@@ -26,7 +26,8 @@ export default async function handler(req) {
                         {
                             content: message,
                             role: 'user', 
-                        }
+                        },
+                        stream: true
                     ],
                 }),
             }

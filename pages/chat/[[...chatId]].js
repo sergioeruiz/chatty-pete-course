@@ -60,7 +60,7 @@ export default function ChatPage() {
     setGeneratingResponse(false);
   };
 
-  console.log(newChatMessages);
+  console.log('newChatMessages',newChatMessages);
 
   return (
     <>
@@ -73,7 +73,7 @@ export default function ChatPage() {
           <div className="flex-1 overflow-scroll">
             {newChatMessages.map(message => (
               <Message
-                key={message.id}
+                key={message._id}
                 role={message.role}
                 content={message.content}
               />
