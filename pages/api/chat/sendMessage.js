@@ -12,6 +12,42 @@ export default async function handler(req) {
             content: 'Your name is Chatty Pete. An incredibly intelligent and quick-thinking AI, taht always replies with a enthusiastic and positive energy. Your reponse must be formatted as markdown.',
         };
 
+        const response = await fetch(
+            `${req.headers.get('origin')}/api/chat/createNewChat`,
+            {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                    cookie: req.header.get('cookie'),
+                },
+                body: JSON.stringify({
+                    message,
+                })
+            },{
+                onBeforeStream: ({ emit }) => {
+                    emit(chatsID, 'newChatId');
+                },
+                onAfterStream: async ({ fullContent }) => {
+                    await fetch(`${ req.headers.get('origin') }/api/chat/addMessageToChat`, {
+                        method: 'POST',
+                        headers: {
+                            'content-type': 'application/json',
+                            cookie: req.headers.get('cookie'),
+                        },
+                        body: JSON.stringify({
+                            chatId,
+                            role: 'assistant',
+                            content: fullContent,
+                        }),
+                    });
+                }
+            }
+
+        );
+        const json = await response.json();
+        const chatID = json._id;
+        console.log('new chat', json);
+
         const stream = await new OpenAIEdgeStream(
             "https://api.openai.com/v1/chat/completions",
             {
@@ -26,9 +62,9 @@ export default async function handler(req) {
                         {
                             content: message,
                             role: 'user', 
-                        },
-                        stream: true
+                        }
                     ],
+                    stream: true,
                 }),
             }
         );
